@@ -18,8 +18,22 @@ method {:main} Main(ghost env: HostEnvironment?)
   modifies env.ok
   modifies env.files
 {
+  GetCommandLineArg(2, env);
+  NumCommandLineArgs(env) == 2;
+
+  arg[0] := SourceFile;
+  arg[1] := DestFile;
+
+  ensures fresh(DestFile);
+  DestFile== new SourceFile;
+
+  DestFile == old(SourceFile);
 
 
-
-    print "done!\n";
+  print "done!\n";
 }
+
+
+
+ 
+ 
