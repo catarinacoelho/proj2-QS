@@ -13,21 +13,35 @@ method ArrayFromSeq<A>(s: seq<A>) returns (a: array<A>)
   a := new A[|s|] ( i requires 0 <= i < |s| => s[i] );
 }
 
+
+// TO COMPILE  C:\dafny\Dafny.exe cp.dfy IoNative.cs
+
 method {:main} Main(ghost env: HostEnvironment?)
-  requires env != null && env.Valid() && env.ok.ok();
+  requires env != null && env.Valid() && env.ok.ok()
+  requires env.constants.NumCommandLineArgs(env) as int == 2
+
   modifies env.ok
   modifies env.files
+  
+  //ensures fresh(DestFile);
 {
-  GetCommandLineArg(2, env);
-  NumCommandLineArgs(env) == 2;
 
-  arg[0] := SourceFile;
-  arg[1] := DestFile;
+  //var arg : array<char>;
 
-  ensures fresh(DestFile);
-  DestFile== new SourceFile;
+  var argc : uint32;
+  argc :=  env.constants.NumCommandLineArgs(env);
 
-  DestFile == old(SourceFile);
+
+
+  var arg : array<char>;
+
+  arg := env.constants.GetCommandLineArg( 2, env);
+
+  //DestFile == new SourceFile;
+
+  var name:array<char>;
+
+  var test := FileStream.FileExists(name, env);
 
 
   print "done!\n";
