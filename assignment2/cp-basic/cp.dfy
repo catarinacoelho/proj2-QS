@@ -18,7 +18,13 @@ method ArrayFromSeq<A>(s: seq<A>) returns (a: array<A>)
 
 method {:main} Main(ghost env: HostEnvironment?)
   requires env != null && env.Valid() && env.ok.ok()
+  
+  
   requires env.constants.NumCommandLineArgs(env) as int == 2
+  
+  requires 0 <= 2 as int < |env.constants.CommandLineArgs()|;
+
+
 
   modifies env.ok
   modifies env.files
