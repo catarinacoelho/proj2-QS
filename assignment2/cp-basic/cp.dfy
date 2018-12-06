@@ -22,7 +22,7 @@ method {:main} Main(ghost env: HostEnvironment?)
   
   requires env.constants.NumCommandLineArgs(env) as int == 2
   
-  requires 0 <= 2 as int < |env.constants.CommandLineArgs()|;
+  requires 2  == |env.constants.CommandLineArgs()|;
 
 
 
