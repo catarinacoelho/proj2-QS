@@ -80,10 +80,14 @@ method {:main} Main(ghost env: HostEnvironment?)
   var readFromSource, writeToDest := true, true;
 
   while ((file_offset + num_bytes) < len as int)
+    invariant sourceFileStream.env.files != null;
     invariant sourceFileStream.Name() in sourceFileStream.env.files.state(); 
     invariant sourceFileStream.IsOpen() && sourceFileStream.env.Valid() && sourceFileStream.env.ok.ok();
     decreases len as int - (file_offset + num_bytes);
   {
+
+    writeOnBuffer(sourceFileStream, file_offset as nat32, buffer, num_bytes as int32);
+
     //Read(file_offset:nat32, buffer:array?<byte>, start:int32, num_bytes:int32) returns(ok:bool)
     readFromSource := sourceFileStream.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
     if !readFromSource {
@@ -97,19 +101,21 @@ method {:main} Main(ghost env: HostEnvironment?)
       return;
     } 
 
-    wroteOnFileLemma();
-
     file_offset := file_offset + num_bytes;    
   }
 
-  //DestFile == new SourceFile;
-
-  print "done!\r\n";
+  print "File copied!\r\n";
 }
 
 
-//What do we need to verify? The READ and the WRITE?
-lemma :{axiom true} wroteOnFileLemma()  
-  requires env != null && env.Valid() && env.ok.ok();
+// Guarantee that the buffer has been freshly allocated (and contains the information we want to read)
+lemma {:axiom} writeOnBuffer(sourceFileStream: FileStream, file_offset: nat32, buffer: array?<byte>, num_bytes: int32)  
+  requires sourceFileStream.env.files != null;
+  requires sourceFileStream.Name() in sourceFileStream.env.files.state(); 
+  requires sourceFileStream.IsOpen() && sourceFileStream.env.Valid() && sourceFileStream.env.ok.ok();
+
   ensures fresh(buffer);
-{}
+
+
+
+
