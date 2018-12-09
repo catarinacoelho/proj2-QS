@@ -83,12 +83,19 @@ method {:main} Main(ghost env: HostEnvironment?)
   {
     //Read(file_offset:nat32, buffer:array?<byte>, start:int32, num_bytes:int32) returns(ok:bool)
     readFromSource := sourceFileStream.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
+    if !readFromSource {
+      print "Read failed!\n";
+      return;
+    }  
     //Write(file_offset:nat32, buffer:array?<byte>, start:int32, num_bytes:int32) returns(ok:bool)
     writeToDest := destFileStream.Write(file_offset as nat32, buffer, start as int32, num_bytes as int32);
+    if !writeToDest {
+      print "Write failed!\n";
+      return;
+    } 
 
-    //Fazer a verificação se deu true??
+    wroteOnFileLemma();
 
-    //xxxxxxxLemma(xxxxxxxx);
     file_offset := file_offset + num_bytes;    
   }
 
@@ -100,7 +107,7 @@ method {:main} Main(ghost env: HostEnvironment?)
 
 //What do we need to verify? The READ and the WRITE?
 /*
-lemma xxxxxxxLemma(xxxxxxxx)
+lemma wroteOnFileLemma()(xxxxxxxx) :{axiom true} 
   requires env != null && env.Valid() && env.ok.ok();
   ensures xxxxxx;
   decreases xxxxx;
@@ -108,5 +115,3 @@ lemma xxxxxxxLemma(xxxxxxxx)
   assume false;
 }
 */
-
-
