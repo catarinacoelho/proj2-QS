@@ -27,8 +27,11 @@ method {:main} Main(ghost env: HostEnvironment?)
   //ensures fresh(DestFile);
 {
   var args := HostConstants.NumCommandLineArgs(env);
-
-  //  ./cp SourceFile DestFile
+  // arg0 is cp, arg 1 is SourceFile, arg2 is DestFile 
+  if args != 3{
+    print "Invalid arguments, should be: ./cp SourceFile DestFile\r\n";
+    return;
+  }
 
   var sourceFile := HostConstants.GetCommandLineArg(1, env);
   var destFile := HostConstants.GetCommandLineArg(2, env);
@@ -36,35 +39,35 @@ method {:main} Main(ghost env: HostEnvironment?)
   // sourceFile needs to exist
   var sourceFileExists := FileStream.FileExists(sourceFile, env);
   if !sourceFileExists  {
-    print "Source file doesn't exist!\n";
+    print "Source file doesn't exist!\r\n";
     return;
   }
 
   // destFile can't exist
   var destFileExists := FileStream.FileExists(destFile, env);
   if destFileExists {
-    print "Destination file already exists!\n";
+    print "Destination file already exists!\r\n";
     return;
   }
 
   // If the file exists, then the file contents are unchanged
   var source, sourceFileStream := FileStream.Open(sourceFile, env);
   if !source {
-    print "SourceFile failed to open!\n";
+    print "SourceFile failed to open!\r\n";
     return;
   }
 
  // If the file doesn't exist, it creates one with no content
  var destination, destFileStream := FileStream.Open(destFile, env); 
   if !destination {
-   print "DestinationFile failed to open!\n";
+   print "DestinationFile failed to open!\r\n";
    return;
   }
 
   // Get the lenght of the file -> len:int32
   var success, len: int32 := FileStream.FileLength(sourceFile, env);
   if !success {
-       print "Couldn't get file size!\n";
+       print "Couldn't get file size!\r\n";
        return;
   }  
 
@@ -77,20 +80,20 @@ method {:main} Main(ghost env: HostEnvironment?)
   var readFromSource, writeToDest := true, true;
 
   while ((file_offset + num_bytes) < len as int)
-    invariant sourceFileStream.Name() in sourceFileStream.env.files.state(); // && sourceFileStream.env.files.state() != null;
+    invariant sourceFileStream.Name() in sourceFileStream.env.files.state(); 
     invariant sourceFileStream.IsOpen() && sourceFileStream.env.Valid() && sourceFileStream.env.ok.ok();
     decreases len as int - (file_offset + num_bytes);
   {
     //Read(file_offset:nat32, buffer:array?<byte>, start:int32, num_bytes:int32) returns(ok:bool)
     readFromSource := sourceFileStream.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
     if !readFromSource {
-      print "Read failed!\n";
+      print "Read failed!\r\n";
       return;
     }  
     //Write(file_offset:nat32, buffer:array?<byte>, start:int32, num_bytes:int32) returns(ok:bool)
     writeToDest := destFileStream.Write(file_offset as nat32, buffer, start as int32, num_bytes as int32);
     if !writeToDest {
-      print "Write failed!\n";
+      print "Write failed!\r\n";
       return;
     } 
 
@@ -101,17 +104,12 @@ method {:main} Main(ghost env: HostEnvironment?)
 
   //DestFile == new SourceFile;
 
-  print "done!\n";
+  print "done!\r\n";
 }
 
 
 //What do we need to verify? The READ and the WRITE?
-/*
-lemma wroteOnFileLemma()(xxxxxxxx) :{axiom true} 
+lemma :{axiom true} wroteOnFileLemma()  
   requires env != null && env.Valid() && env.ok.ok();
-  ensures xxxxxx;
-  decreases xxxxx;
-{
-  assume false;
-}
-*/
+  ensures fresh(buffer);
+{}

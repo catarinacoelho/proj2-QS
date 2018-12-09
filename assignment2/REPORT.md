@@ -7,18 +7,16 @@ INFO: When you call a method, you "call" the specification (ensures), the body d
 ## Question 1:
 ### Note that in the FileSystemState and the FileStream classes, all of the functions say they read this. Why is this important?
 
-The body of a function needs to be a single expression
+For us to be able to reach things we did not receive as arguments with need to say reads this, and this way, those functions are able to access anduse information they didn't receive as arguments.
 
 ## Question 2:
-### Note that it isn’t possible to create new FileSystemState objects. What would problems might arise if this were possible?
+### Note that it isn’t possible to create new FileSystemState objects. What problems might arise if this were possible?
 
-class FileSystemState
-{
-    constructor{ :axiom} () requires false;
-    function {:axiom} state() : map<seq<char>,seq<byte>>   // File system maps file names (sequences of characters) to their contents
-        reads this;
-}
+What the FileSystemState does is map file names (sequences of characters) to their content, so you can only map file names and the content of existing files, meaning that FileSystemState only applies to already existing files.
 
+Since it makes
+
+, n faz sentido mapearmos um ficheiro que n existe
 
 
 ## Question 3:
@@ -27,6 +25,8 @@ A precondition is a condition that a caller must stabilish before it is allowed 
 
 For main to be able to call the other methods, it needs to be sure that it follows those methods pre conditions.
 
+
+oprograma n corre sem que as pre condições sejam verificadas
 SOMETHING LIKE THIS????
 
 
