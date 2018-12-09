@@ -19,9 +19,21 @@ method ArrayFromSeq<A>(s: seq<A>) returns (a: array<A>)
 
 method {:main} Main(ghost env: HostEnvironment?)
 	requires env != null && env.Valid() && env.ok.ok()
-	modifies env.ok
+	requires |env.files.state()| > 0 //requires 1 file to exist
+    requires |env.constants.CommandLineArgs()| == 3
+    requires env.constants.CommandLineArgs()[1] in env.files.state()
+    requires !(env.constants.CommandLineArgs()[2] in env.files.state())
+    requires |env.files.state()[env.constants.CommandLineArgs()[1]] | > 0 
+    modifies env.ok
 	modifies env.files
-	
+
+    //ensures env.constants.CommandLineArgs()[2] in env.files.state() ==> 
+    //env.files.state()[env.constants.CommandLineArgs()[1]] == env.files.state()[env.constants.CommandLineArgs()[2]]
+    // having the 2nd files implies that the file was copied
+    
+    // ensures env.files.state()[env.constants.CommandLineArgs()[1]] == old(env.files.state()[env.constants.CommandLineArgs()[1]])
+    // the origin file wasn't modified
+
 {
 	var args := HostConstants.NumCommandLineArgs(env);
 	// arg0 is cp, arg 1 is SourceFile, arg2 is DestFile 
@@ -72,6 +84,9 @@ method {:main} Main(ghost env: HostEnvironment?)
         return;
 	}
 
+    assert destFileStream.Name() in destFileStream.env.files.state(); 
+	assert destFileStream.IsOpen() && destFileStream.env.ok.ok();
+
 	// Get the lenght of the file -> len:int32
 	var ok, len: int32 := FileStream.FileLength(sourceFile, env);
 	if !ok {
@@ -85,15 +100,13 @@ method {:main} Main(ghost env: HostEnvironment?)
 	var buffer := new byte[buffer_size]; // byte = b:int | 0 <= b < 256
 	var start := 0;
 	
-	var readFromSource, writeToDest := true, true;
-
 	while ((file_offset) < len as int)
-		invariant sourceFileStream.env.files != null;
+		invariant sourceFileStream.env.Valid()
 		invariant sourceFileStream.Name() in sourceFileStream.env.files.state(); 
-		invariant sourceFileStream.IsOpen() && sourceFileStream.env.Valid() && sourceFileStream.env.ok.ok();
-		invariant destFileStream.env.files != null;
+		invariant sourceFileStream.IsOpen() && sourceFileStream.env.ok.ok();
+		invariant destFileStream.env.Valid()
 		invariant destFileStream.Name() in destFileStream.env.files.state(); 
-		invariant destFileStream.IsOpen() && destFileStream.env.Valid() && destFileStream.env.ok.ok();
+		invariant destFileStream.IsOpen() && destFileStream.env.ok.ok();
 		
         decreases len as int - (file_offset + buffer_size);
 	{
@@ -108,24 +121,31 @@ method {:main} Main(ghost env: HostEnvironment?)
 		writeOnBuffer(sourceFileStream, file_offset as nat32, buffer, num_bytes as int32);
 
 		//Read(file_offset:nat32, buffer:array?<byte>, start:int32, num_bytes:int32) returns(ok:bool)
-		readFromSource := sourceFileStream.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
+		var readFromSource := sourceFileStream.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
 		if !readFromSource {
 			print "Read failed!\r\n";
 			return;
 		}  
+
+
 		//Write(file_offset:nat32, buffer:array?<byte>, start:int32, num_bytes:int32) returns(ok:bool)
-		writeToDest := destFileStream.Write(file_offset as nat32, buffer, start as int32, num_bytes as int32);
+		var writeToDest := destFileStream.Write(file_offset as nat32, buffer, start as int32, num_bytes as int32);
 		if !writeToDest {
 			print "Write failed!\r\n";
 			return;
 		} 
 
+
 		file_offset := file_offset + buffer_size;    
 	}
 
-    //var closed := sourceFileStream.Close();
+    // Needed to make this works
+    ModifiedStream(sourceFileStream);
+    var closed := sourceFileStream.Close();
 
-    //var closed2 := destFileStream.Close();
+    // Needed to make this works
+    ModifiedStream(destFileStream);
+    var closed2 := destFileStream.Close();
 
 	print "File copied with Success!\r\n";
 }
@@ -139,6 +159,7 @@ lemma {:axiom} writeOnBuffer(sourceFileStream: FileStream, file_offset: nat32, b
 
 	ensures fresh(buffer);
 
-
+lemma {:axiom} ModifiedStream(fs: FileStream) 
+	ensures fresh(fs);
 
 
