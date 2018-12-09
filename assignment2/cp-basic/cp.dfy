@@ -18,13 +18,9 @@ method ArrayFromSeq<A>(s: seq<A>) returns (a: array<A>)
 
 method {:main} Main(ghost env: HostEnvironment?)
   requires env != null && env.Valid() && env.ok.ok()
+  requires |env.constants.CommandLineArgs()| == 3
   modifies env.ok
   modifies env.files
- // modifies buffer
-
- // ensure the copy was done??
-  
-  //ensures fresh(DestFile);
 {
   var args := HostConstants.NumCommandLineArgs(env);
   // arg0 is cp, arg 1 is SourceFile, arg2 is DestFile 
@@ -101,7 +97,7 @@ method {:main} Main(ghost env: HostEnvironment?)
       return;
     } 
 
-    file_offset := file_offset + num_bytes;    
+    file_offset := file_offset + num_bytes;  
   }
 
   print "File copied!\r\n";
