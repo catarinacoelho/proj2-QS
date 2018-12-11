@@ -43,6 +43,7 @@ method decompress_impl(compressed_bytes:array?<byte>) returns (bytes:array?<byte
 
 method {:main} Main(ghost env:HostEnvironment?)
   requires env != null && env.Valid() && env.ok.ok();
+  requires |env.constants.CommandLineArgs()| == 4
 {
   var args := HostConstants.NumCommandLineArgs(env);
   // arg0 is compression, arg 1 is compress/decompress, arg2 is SourceFile, arg3 is DestFile 

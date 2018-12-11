@@ -9,6 +9,7 @@ include "Io.dfy"
 // Useful to convert Dafny strings into arrays of characters.
 method ArrayFromSeq<A>(s: seq<A>) returns (a: array<A>)
   ensures a[..] == s
+  ensures fresh(a)
 {
   a := new A[|s|] ( i requires 0 <= i < |s| => s[i] );
 }
