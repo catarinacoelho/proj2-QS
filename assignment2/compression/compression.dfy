@@ -10,12 +10,12 @@ include "Io.dfy"
 
 function compress(bytes:seq<byte>) : seq<byte>
 {
-bytes
-}
+  if |bytes| == 0 then bytes else compress(bytes[..1]) + compress(bytes[1..])
+}  
 
 function decompress(bytes:seq<byte>) : seq<byte>
 {
-bytes
+ if |bytes| == 0 then bytes else decompress(bytes[..1]) + decompress(bytes[1..])
 }
 
 lemma lossless(bytes:seq<byte>)
