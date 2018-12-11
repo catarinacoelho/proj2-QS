@@ -14,12 +14,13 @@ method ArrayFromSeq<A>(s: seq<A>) returns (a: array<A>)
   a := new A[|s|] ( i requires 0 <= i < |s| => s[i] );
 }
 
-
-// TO COMPILE  C:\dafny\Dafny.exe cp.dfy IoNative.cs
-
 method {:main} Main(ghost env: HostEnvironment?)
   requires env != null && env.Valid() && env.ok.ok()
+  requires |env.files.state()| > 0 //requires 1 file to exist
   requires |env.constants.CommandLineArgs()| == 3
+  requires env.constants.CommandLineArgs()[1] in env.files.state()
+  requires !(env.constants.CommandLineArgs()[2] in env.files.state())
+  requires |env.files.state()[env.constants.CommandLineArgs()[1]] | > 0 
   modifies env.ok
   modifies env.files
 {
@@ -36,35 +37,35 @@ method {:main} Main(ghost env: HostEnvironment?)
   // sourceFile needs to exist
   var sourceFileExists := FileStream.FileExists(sourceFile, env);
   if !sourceFileExists  {
-    print "Source file doesn't exist!\r\n";
+    print "Error: Source file doesn't exist!\r\n";
     return;
   }
 
   // destFile can't exist
   var destFileExists := FileStream.FileExists(destFile, env);
   if destFileExists {
-    print "Destination file already exists!\r\n";
+    print "Error: Destination file already exists!\r\n";
     return;
   }
 
   // If the file exists, then the file contents are unchanged
   var source, sourceFileStream := FileStream.Open(sourceFile, env);
   if !source {
-    print "SourceFile failed to open!\r\n";
+    print "Error: SourceFile failed to open!\r\n";
     return;
   }
 
  // If the file doesn't exist, it creates one with no content
  var destination, destFileStream := FileStream.Open(destFile, env); 
   if !destination {
-   print "DestinationFile failed to open!\r\n";
+   print "Error: DestinationFile failed to open!\r\n";
    return;
   }
 
   // Get the lenght of the file -> len:int32
   var success, len: int32 := FileStream.FileLength(sourceFile, env);
   if !success {
-       print "Couldn't get file size!\r\n";
+       print "Error: Couldn't get file size!\r\n";
        return;
   }  
 
@@ -73,26 +74,28 @@ method {:main} Main(ghost env: HostEnvironment?)
   var num_bytes: int := 256;
   var buffer := new byte[num_bytes]; // byte = b:int | 0 <= b < 256
   var start := 0;
-  
-  var readFromSource, writeToDest := true, true;
 
   while ((file_offset + num_bytes) < len as int)
-    invariant sourceFileStream.env.files != null;
+    invariant sourceFileStream.env.files != null && destFileStream.env.files != null;
     invariant sourceFileStream.Name() in sourceFileStream.env.files.state(); 
     invariant sourceFileStream.IsOpen() && sourceFileStream.env.Valid() && sourceFileStream.env.ok.ok();
+		invariant destFileStream.Name() in destFileStream.env.files.state(); 
+		invariant destFileStream.IsOpen() && destFileStream.env.Valid() && destFileStream.env.ok.ok();
+
     decreases len as int - (file_offset + num_bytes);
   {
 
-    writeOnBuffer(sourceFileStream, file_offset as nat32, buffer, num_bytes as int32);
+    WriteOnBuffer(sourceFileStream, file_offset as nat32, buffer, num_bytes as int32);
 
     //Read(file_offset:nat32, buffer:array?<byte>, start:int32, num_bytes:int32) returns(ok:bool)
-    readFromSource := sourceFileStream.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
+    var readFromSource := sourceFileStream.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
     if !readFromSource {
       print "Read failed!\r\n";
       return;
     }  
+
     //Write(file_offset:nat32, buffer:array?<byte>, start:int32, num_bytes:int32) returns(ok:bool)
-    writeToDest := destFileStream.Write(file_offset as nat32, buffer, start as int32, num_bytes as int32);
+    var writeToDest := destFileStream.Write(file_offset as nat32, buffer, start as int32, num_bytes as int32);
     if !writeToDest {
       print "Write failed!\r\n";
       return;
@@ -101,18 +104,31 @@ method {:main} Main(ghost env: HostEnvironment?)
     file_offset := file_offset + num_bytes;  
   }
 
+  //Close the sourceFile
+  ModifiedStream(sourceFileStream);
+  var closed := sourceFileStream.Close();
+
+  //Close the destFile
+  ModifiedStream(destFileStream);
+  var closed2 := destFileStream.Close();
+
   print "File copied!\r\n";
 }
 
-
 // Guarantee that the buffer has been freshly allocated (and contains the information we want to read)
-lemma {:axiom} writeOnBuffer(sourceFileStream: FileStream, file_offset: nat32, buffer: array?<byte>, num_bytes: int32)  
+lemma {:axiom} WriteOnBuffer(sourceFileStream: FileStream, file_offset: nat32, buffer: array?<byte>, num_bytes: int32)  
   requires sourceFileStream.env.files != null;
   requires sourceFileStream.Name() in sourceFileStream.env.files.state(); 
   requires sourceFileStream.IsOpen() && sourceFileStream.env.Valid() && sourceFileStream.env.ok.ok();
 
   ensures fresh(buffer);
 
+// Guarantee that the file stream has been freshly modified
+lemma {:axiom} ModifiedStream(fs: FileStream) 
+  requires fs.env.files != null;
+  requires fs.Name() in fs.env.files.state(); 
+  requires fs.IsOpen() && fs.env.Valid() && fs.env.ok.ok();
 
+	ensures fresh(fs);
 
 
