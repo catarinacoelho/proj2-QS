@@ -141,7 +141,6 @@ lemma {:axiom} WriteOnBuffer(sourceFileStream: FileStream, file_offset: nat32, b
 	requires sourceFileStream.env.files != null;
 	requires sourceFileStream.Name() in sourceFileStream.env.files.state(); 
 	requires sourceFileStream.IsOpen() && sourceFileStream.env.Valid() && sourceFileStream.env.ok.ok();
-
 	ensures fresh(buffer);
 
 // Guarantee that the file stream has been freshly modified
@@ -149,6 +148,5 @@ lemma {:axiom} ModifiedStream(fs: FileStream)
 	requires fs.env.files != null;
 	requires fs.Name() in fs.env.files.state(); 
 	requires fs.IsOpen() && fs.env.Valid() && fs.env.ok.ok();
-	
 	ensures fresh(fs);
 

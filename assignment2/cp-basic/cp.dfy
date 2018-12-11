@@ -71,37 +71,44 @@ method {:main} Main(ghost env: HostEnvironment?)
 
   // Arguments necessary for the Write and Read methods
   var file_offset: int := 0;
-  var num_bytes: int := 256;
-  var buffer := new byte[num_bytes]; // byte = b:int | 0 <= b < 256
+  var buffer_size: int := 256;
+  var buffer := new byte[buffer_size]; // byte = b:int | 0 <= b < 256
   var start := 0;
 
-  while ((file_offset + num_bytes) < len as int)
+  while ((file_offset) < len as int)
     invariant sourceFileStream.env.files != null && destFileStream.env.files != null;
     invariant sourceFileStream.Name() in sourceFileStream.env.files.state(); 
     invariant sourceFileStream.IsOpen() && sourceFileStream.env.Valid() && sourceFileStream.env.ok.ok();
 		invariant destFileStream.Name() in destFileStream.env.files.state(); 
 		invariant destFileStream.IsOpen() && destFileStream.env.Valid() && destFileStream.env.ok.ok();
 
-    decreases len as int - (file_offset + num_bytes);
+    decreases len as int - (file_offset + buffer_size);
   {
+		var num_bytes := buffer_size;
 
-    WriteOnBuffer(sourceFileStream, file_offset as nat32, buffer, num_bytes as int32);
+    // At the last copy iteration, the content may not fill the whole buffer; Copy only what's left
+		if(file_offset + buffer_size >= len as int){
+			num_bytes := len as int - file_offset;
+		}
 
-    //Read(file_offset:nat32, buffer:array?<byte>, start:int32, num_bytes:int32) returns(ok:bool)
-    var readFromSource := sourceFileStream.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
-    if !readFromSource {
-      print "Read failed!\r\n";
-      return;
-    }  
+    // Ensure buffer is fresh
+		WriteOnBuffer(sourceFileStream, file_offset as nat32, buffer, num_bytes as int32);
 
-    //Write(file_offset:nat32, buffer:array?<byte>, start:int32, num_bytes:int32) returns(ok:bool)
-    var writeToDest := destFileStream.Write(file_offset as nat32, buffer, start as int32, num_bytes as int32);
-    if !writeToDest {
-      print "Write failed!\r\n";
-      return;
-    } 
+		//Read(file_offset:nat32, buffer:array?<byte>, start:int32, num_bytes:int32) returns(ok:bool)
+		var readFromSource := sourceFileStream.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
+		if !readFromSource {
+			print "Read failed!\r\n";
+			return;
+		}  
 
-    file_offset := file_offset + num_bytes;  
+		//Write(file_offset:nat32, buffer:array?<byte>, start:int32, num_bytes:int32) returns(ok:bool)
+		var writeToDest := destFileStream.Write(file_offset as nat32, buffer, start as int32, num_bytes as int32);
+		if !writeToDest {
+			print "Write failed!\r\n";
+			return;
+		} 
+
+    file_offset := file_offset + buffer_size;  
   }
 
   //Close the sourceFile
@@ -120,7 +127,6 @@ lemma {:axiom} WriteOnBuffer(sourceFileStream: FileStream, file_offset: nat32, b
   requires sourceFileStream.env.files != null;
   requires sourceFileStream.Name() in sourceFileStream.env.files.state(); 
   requires sourceFileStream.IsOpen() && sourceFileStream.env.Valid() && sourceFileStream.env.ok.ok();
-
   ensures fresh(buffer);
 
 // Guarantee that the file stream has been freshly modified
@@ -128,7 +134,6 @@ lemma {:axiom} ModifiedStream(fs: FileStream)
   requires fs.env.files != null;
   requires fs.Name() in fs.env.files.state(); 
   requires fs.IsOpen() && fs.env.Valid() && fs.env.ok.ok();
-
 	ensures fresh(fs);
 
 
