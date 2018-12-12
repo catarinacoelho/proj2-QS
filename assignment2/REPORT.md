@@ -1,4 +1,4 @@
-# Question 1:
+﻿# Question 1:
 ## Note that in the FileSystemState and the FileStream classes, all of the functions say they read this. Why is this important?
 A _reads_ clause specifies the set of memory locations that a function may read. _reads this_ allows the function to read anything inside it's class.
 
@@ -41,6 +41,7 @@ On the other hand, if the lenght of _bytes_ is bigger than 1, we do the followin
     3. When the value of the position _i_ of _bytes_ is different from the value of the position _i_ + 1 of _bytes_, we had the the value of the position _i_ of _bytes_ and the value of the _counter_ to _compressed_bytes_, concatnating those sequences and transforming them into an array and we increment the variable _i_. 
 
 ####Decompress
+Since the compressed_bytes is a array of bytes that contains the frequency of each repeated byte, once we receive the array, we go through the array and the iterator starts as 0, so that we start at the first position of the array, this way for each position i que write the content of position i as much times as the explicited in the position i+1. Once the array has all been sweeped the content should be decompressed as the origina one.
 
 
 
