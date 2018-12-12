@@ -1,15 +1,8 @@
 # Question 1:
 ## Note that in the FileSystemState and the FileStream classes, all of the functions say they read this. Why is this important?
-Those functions say "reads this", to be able to access and use information they did not receive as arguments or are stored in heap memory, this way they can access attributes inside it's class.
+A _reads_ clause specifies the set of memory locations that a function may read. _reads this_ allows the function to read anything inside it's class.
 
-//porque é que temos de ter o read this lá, tem haver com frames. Se o que está no read não muda...
-
-m.reads is used to denote the things that method m may read.
-
-A reads clause specifies the set of memory locations that a function may read.  If "*" is given in a reads clause it means any memory may be read. This allows the function to read anything inside it's class.
-
-Functions are not allowed to have side effects but may be restricted in what they can read. The reading frame of a function (or predicate) is all the memory locations that the function is allowed to read. The reason we might limit what a function can read is so that when we write to memory, we can be sure that functions that did not read that part of memory have the same value they did before. For example, we might have two arrays, one of which we know is sorted. If we did not put a reads annotation on the sorted predicate, then when we modify the unsorted array, we cannot determine whether the other array stopped being sorted. While we might be able to give invariants to preserve it in this case, it gets even more complex when manipulating data structures. In this case, framing is essential to making the verification process feasible.
-
+The reason we might limit what a function can read is so that when we write to memory, we can be sure that functions that did not read that part of memory have the same value they did before. This is important because the _reading frame_ might be essential to make the verification process feasible.
 
 
 # Question 2:
@@ -27,12 +20,11 @@ A precondition is a condition that a caller must stabilish before it is allowed 
 # Challenge 2
 ## Explain the algorithm and decisions
 
-The algorithm we chose was the Run Length Encoding (RLE) data compression algorithm which is a form of lossless data compression.
+The algorithm we chose was the Run Length Encoding (RLE) data compression algorithm because it is a simple form of lossless data compression.
 
-For example, if apply our algorithm to compress this: HHHHHHHHHHHFBRRRRRRRRRRRRVVVFWW
-
-We get: H11F1B1V12F1W2
-
+It works the following way:
+- If we apply our algorithm to compress "HHHHHHHHHHHFBRRRRRRRRRRRRVVVFWW"
+- We get "H11F1B1V12F1W2"
 
 ###Explanation of the algorithm (compress_impl and decompress_impl methods)
 
@@ -50,6 +42,9 @@ If the lenght of _bytes_ is bigger than 1, we do the following:
 2. if the value is the same and we are not at the end of the data stream, we increment our count and . If it isn't the same, then we write the value of the count
 
 Para na descompressão ser mais facil localizar os valores, colacamos os
+
+####Decompress
+
 
 
 References:
