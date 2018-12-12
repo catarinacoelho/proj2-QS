@@ -29,19 +29,16 @@ It works the following way:
 ###Explanation of the algorithm (compress_impl and decompress_impl methods)
 
 ####Compress
-Being _bytes_ what we need to compress and _compressed_bytes_ the compression, we start by checking if the lenght of _bytes_ is 0 or 1. If it is 0 or 1, it means it is empty or it only has one element and therefore, there is no need to apply the algorithm, so we say that the _compressed_bytes_ is equal to _bytes_ (identity function).
+Being _bytes_ what we need to compress and *compressed_bytes* the compression, we start by checking if the lenght of _bytes_ is 0 or 1. If it is 0 or 1, it means it is empty or it only has one element and therefore, there is no need to apply the algorithm, so we say that *compressed_bytes* is equal to _bytes_ (identity function).
 
-If the lenght of _bytes_ is bigger than 1, we do the following:
+On the other hand, if the lenght of _bytes_ is bigger than 1, we do the following:
+1. Initialize _counter_ to 1 and variable _i_ to 0;
+2. While _i_ is smaller then the lenght of _bytes_ - 1 (because the array starts in the position 0):
 
-1. We initialize a counter to 1 
-
-1. We compare the element i of _bytes_, starting in the first element of _bytes_ ([bytes[0]), with
-
- value of the first element of _bytes_ ([bytes[0]) and compare it to the value of the next position off "bytes" ([bytes[1]),
-
-2. if the value is the same and we are not at the end of the data stream, we increment our count and . If it isn't the same, then we write the value of the count
-
-Para na descompressão ser mais facil localizar os valores, colacamos os
+    1. Assure the before entiring the next cycle, the _counter_ is 1 (we restart the _counter_);
+    2. While the value of the position _i_ of _bytes_ is equal to the value of the position _i_ + 1 of _bytes_ (check if consecutive values are equal) and the _counter_ is smaller then 255 (because the type _byte_ goes from 0 to 256):
+        1. We increment the _counter_ and the variable _i_ (counting how many times the same value appears consecutively);
+    3. When the value of the position _i_ of _bytes_ is different from the value of the position _i_ + 1 of _bytes_, we had the the value of the position _i_ of _bytes_ and the value of the _counter_ to _compressed_bytes_, concatnating those sequences and transforming them into an array and we increment the variable _i_. 
 
 ####Decompress
 
