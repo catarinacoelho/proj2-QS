@@ -70,15 +70,9 @@ method compress_impl(bytes:array?<byte>) returns (compressed_bytes:array?<byte>)
   compressed_bytes := ArrayFromSeq(s);
 
   //in case the file is empty
-  if bytes.Length == 0{
+  if bytes.Length <= 1{
     compressed_bytes := bytes;
     return compressed_bytes;
-  }
-  
-  //in case the file has only one byte to compress
-  if bytes.Length == 1{
-    compressed_bytes := ArrayFromSeq(bytes[..]); //adicionar o  + [1] esta a fazer com que uma condiçao might not hold
-    return compressed_bytes; //condiçao pode nao hold pq compress nao ta implementado
   }
 
   //in case the file has more than one byte to compress
@@ -90,18 +84,20 @@ method compress_impl(bytes:array?<byte>) returns (compressed_bytes:array?<byte>)
 
     while(i < bytes.Length)
       invariant 0 <= i <= bytes.Length;
+      invariant compressed_bytes != null;
+      //invariant compressed_bytes[..] == compress(bytes[..i]);
       decreases bytes.Length - i;
       {
         count := 1;
         j := i;
-        while(j < bytes.Length - 1 && bytes[j]==bytes[j+1])
+        while(j < bytes.Length - 1 && bytes[j]==bytes[j+1] && count < 255)
           invariant 0 <= j <= bytes.Length - 1;
           decreases bytes.Length - 1 - j;
           {
             count := count + 1;
             j := j + 1;
           }
-        compressed_bytes := ArrayFromSeq(compressed_bytes[..] + [bytes[i]] + [count as byte]);
+        compressed_bytes := ArrayFromSeq(compressed_bytes[..] + [bytes[i]] + [count]);
         i := i +1;
         
       }   
@@ -119,15 +115,9 @@ method decompress_impl(compressed_bytes:array?<byte>) returns (bytes:array?<byte
   bytes := ArrayFromSeq(s);
 
   //in case the file is empty
-  if compressed_bytes.Length == 0{
+  if compressed_bytes.Length <= 1{
     bytes := compressed_bytes;
     return bytes;
-  }
-  
-  //in case the file has only one byte to compress
-  if compressed_bytes.Length == 1{
-    bytes := ArrayFromSeq(compressed_bytes[..]); //adicionar o  + [1] esta a fazer com que uma condiçao might not hold
-    return bytes; //condiçao pode nao hold pq compress nao ta implementado
   }
 
   var i := 0;
