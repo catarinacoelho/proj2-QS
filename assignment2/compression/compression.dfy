@@ -226,35 +226,62 @@ method {:main} Main(ghost env:HostEnvironment?)
     if (compressDecompress != null && |compressDecompress[..]| > 0){
 
       if (compressDecompress[0] == '0'){
-       // var decompressed := decompress_impl(sourceFileStream);
-        //var readFromSource := decompressed.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
-        var writeToDest := destFileStream.Write(file_offset as nat32, buffer, start as int32, num_bytes as int32);
+        //read the sourceFile and put the content on the buffer (buffer is array?<byte>)
+        var readFromSource := sourceFileStream.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
+        if !readFromSource {
+          print "Read failed!\r\n";
+          return;
+		    } 
+        //decompress the buffer's content
+        var decompressed := decompress_impl(buffer); 
+        //write the content of decompressed (decompressed is array?<byte>) in the destFile
+        var writeToDest := destFileStream.Write(file_offset as nat32, decompressed, start as int32, num_bytes as int32);
+      	if !writeToDest {
+          print "Write failed!\r\n";
+          return;
+		    } 
       }
-
       else if(compressDecompress[0]  == '1'){
-        // compressed is a array?<byte>
-        //var compressed := compress_impl(sourceFileStream); 
-        //var readFromSource := compressed.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
-        var writeToDest := destFileStream.Write(file_offset as nat32, buffer, start as int32, num_bytes as int32);
+        //read the sourceFile and put the content on the buffer (buffer is array?<byte>)
+        var readFromSource := sourceFileStream.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
+        if !readFromSource {
+          print "Error: Read failed!\r\n";
+          return;
+	    	} 
+        //compress the buffer's content
+        var compressed := compress_impl(buffer); 
+        //write the content of compressed (compressed is array?<byte>) in the destFile
+        var writeToDest := destFileStream.Write(file_offset as nat32, compressed, start as int32, num_bytes as int32);
+        if !writeToDest {
+          print "Error: Write failed!\r\n";
+          return;
+		    } 
       } 
-
       else {
         print "Error: Invalid argument! Should be 0 or 1.";
         return;
       } 
     }
-    file_offset := file_offset + buffer_size;  
-
-    print "File compressed/decompressed!\r\n"; 
+    file_offset := file_offset + buffer_size;    
   }
 
   //Close the sourceFile
   ModifiedStream(sourceFileStream);
   var closed := sourceFileStream.Close();
+  if !closed {
+    print "Error: SourceFile failed to close!!\r\n";
+    return;
+	} 
 
   //Close the destFile
   ModifiedStream(destFileStream);
   var closed2 := destFileStream.Close();
+  if !closed2 {
+    print "Error: DestinationFile failed to close!!\r\n";
+    return;
+	} 
+
+  print "File compressed/decompressed!\r\n"; 
 }
 
 // Guarantee that the buffer has been freshly allocated (and contains the information we want to read)

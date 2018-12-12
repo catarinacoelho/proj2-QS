@@ -97,14 +97,14 @@ method {:main} Main(ghost env: HostEnvironment?)
 		//Read(file_offset:nat32, buffer:array?<byte>, start:int32, num_bytes:int32) returns(ok:bool)
 		var readFromSource := sourceFileStream.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
 		if !readFromSource {
-			print "Read failed!\r\n";
+			print "Error: Read failed!\r\n";
 			return;
 		}  
 
 		//Write(file_offset:nat32, buffer:array?<byte>, start:int32, num_bytes:int32) returns(ok:bool)
 		var writeToDest := destFileStream.Write(file_offset as nat32, buffer, start as int32, num_bytes as int32);
 		if !writeToDest {
-			print "Write failed!\r\n";
+			print "Error: Write failed!\r\n";
 			return;
 		} 
 
@@ -114,10 +114,18 @@ method {:main} Main(ghost env: HostEnvironment?)
   //Close the sourceFile
   ModifiedStream(sourceFileStream);
   var closed := sourceFileStream.Close();
+  if !closed {
+    print "Error: SourceFile failed to close!!\r\n";
+    return;
+	} 
 
   //Close the destFile
   ModifiedStream(destFileStream);
   var closed2 := destFileStream.Close();
+  if !closed2 {
+    print "Error: DestinationFile failed to close!!\r\n";
+    return;
+	} 
 
   print "File copied!\r\n";
 }
