@@ -80,26 +80,27 @@ method compress_impl(bytes:array?<byte>) returns (compressed_bytes:array?<byte>)
     var j := 0;
     var count := 1;
 
-    while(i < bytes.Length)
+    while(i < bytes.Length - 1  )
       invariant 0 <= i <= bytes.Length;
       invariant compressed_bytes != null;
       //invariant compressed_bytes[..] == compress(bytes[..i]);
       decreases bytes.Length - i;
       {
         count := 1;
-        j := i;
-        while(j < bytes.Length - 1 && bytes[j]==bytes[j+1] && count < 255)
-          invariant 0 <= j <= bytes.Length - 1;
-          decreases bytes.Length - 1 - j;
+        while( i < bytes.Length - 1 && bytes[i] == bytes[i+1] && count < 255)
+          invariant 0 <= i <= bytes.Length - 1;
+          decreases bytes.Length - 1 - i;
           {
             count := count + 1;
-            j := j + 1;
+            i := i + 1;
           }
+
         compressed_bytes := ArrayFromSeq(compressed_bytes[..] + [bytes[i]] + [count]);
-        i := i +1;
+        i := i + 1 ;
         
       }   
   }
+  print "finished compression\n\r";
 }
 
 
@@ -196,7 +197,7 @@ method {:main} Main(ghost env:HostEnvironment?)
 
 	// Arguments necessary for the Write and Read methods
 	var file_offset: int := 0;
-	var buffer_size: int := 256;
+	var buffer_size: int := 2080000;
 	var buffer := new byte[buffer_size]; // byte = b:int | 0 <= b < 256
 	var start := 0;
 
