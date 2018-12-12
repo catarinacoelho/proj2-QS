@@ -16,7 +16,14 @@ method ArrayFromSeq<A>(s: seq<A>) returns (a: array<A>)
 }
 
 
-// TO COMPILE  C:\dafny\Dafny.exe cp.dfy IoNative.cs
+// // // // // // // // // // // // // // // // // // // // // //
+//
+// IMPORTANT NOTE THIS FILE NEEDS THE CLASS Utils.cs to compile
+// Run the compile like this:
+//
+// TO COMPILE  C:\dafny\Dafny.exe cp.dfy IoNative.cs Utils.cs
+//
+// // // // // // // // // // // // // // // // // // // // // //
 
 method {:main} Main(ghost env: HostEnvironment?)
 	requires env != null && env.Valid() && env.ok.ok()
