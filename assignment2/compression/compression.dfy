@@ -231,18 +231,10 @@ method {:main} Main(ghost env:HostEnvironment?)
         if !readFromSource {
           print "Error: Read failed!\r\n";
           return;
-		    } 
+		} 
         //decompress the buffer's content
         var decompressed := decompress_impl(buffer); 
-        print "decompressing";
-        print "\r\n";
-        print buffer.Length;
-        print "\r\n";
-        print len;
-        print "\r\n";
-        print decompressed.Length;
-        print "\r\n";
-        //write the content of decompressed (decompressed is array?<byte>) in the destFile
+       //write the content of decompressed (decompressed is array?<byte>) in the destFile
         var writeToDest := destFileStream.Write(file_offset as nat32, decompressed, start as int32, decompressed.Length as int32);
       	if !writeToDest {
           print "Error: Write failed!\r\n";
@@ -252,17 +244,14 @@ method {:main} Main(ghost env:HostEnvironment?)
       else if(compressDecompress[0]  == '1'){
         //read the sourceFile and put the content on the buffer (buffer is array?<byte>)
         
-        print "reading\r\n";
+        
         var readFromSource := sourceFileStream.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
         if !readFromSource {
           print "Error: Read failed!\r\n";
           return;
 	    } 
-        print "read; now processing \r\n";
         //compress the buffer's content
         var compressed := compress_impl(buffer);
-        print file_offset;
-        print "compressed files\r\n"; 
         //write the content of compressed (compressed is array?<byte>) in the destFile
         var writeToDest := destFileStream.Write(file_offset as nat32, compressed, start as int32, compressed.Length as int32);
         if !writeToDest {
