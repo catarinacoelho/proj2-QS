@@ -37,11 +37,8 @@ On the other hand, if the lenght of _bytes_ is bigger than 1, we do the followin
     1. Assure that before entering the next cycle, the _counter_ is 1 (we restart the _counter_);
     2. While the value of the position _i_ of _bytes_ is equal to the value of the position _i_ + 1 (check if consecutive values are equal) and the _counter_ is smaller then 255 (because the type _byte_ varies from 0 to 256):
         1. We increment the _counter_ (counting how many times the same value appears consecutively) and the variable _i_ (moving foward in the array _bytes_);
-    3. When the value of the position _i_ of _bytes_ is different from the value of the position _i_ + 1, we add the the value of the position _i_ of _bytes_ and the value of the _counter_ to _compressed_bytes_, concatnating those sequences and transforming them into an array and we increment the variable _i_. 
-
-This way we get value of the position and until we reach
-
-
+    3. When the value of the position _i_ of _bytes_ is different from the value of the position _i_ + 1, we concatenate the position _i_ of _bytes_ and the value of the _counter_ to *compressed_bytes*, by transforming the sequences into an array, in order for it to be the same type as *compressed_bytes* and we increment the variable _i_.
+    
 ####Decompress
 
 
