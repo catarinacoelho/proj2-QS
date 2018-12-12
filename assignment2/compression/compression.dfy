@@ -19,20 +19,44 @@ function compress(bytes:seq<byte>) : seq<byte>
   //decreases |bytes|
 {
   bytes
-  //if |bytes| == 0 then bytes else [bytes[0]][..] + compress(bytes[1..])
+  //if |bytes| <= 1 then bytes else [bytes[0]][..] + compress(bytes[1..])
 }  
 
 function decompress(bytes:seq<byte>) : seq<byte>
   //decreases |bytes|
 {
  bytes
- //if |bytes| == 0 then bytes else compress(bytes[..1]) + decompress(bytes[1..])
+ //if |bytes| <= 1 then bytes else compress(bytes[..1]) + decompress(bytes[1..])
 }
 
+/*
 lemma {:induction bytes}lossless(bytes:seq<byte>)
+  requires |bytes| > 0;
   ensures decompress(compress(bytes)) == bytes;
 {
+  if |bytes| <= 1{
+    calc == {
+      decompress(compress(bytes));
+        { assert (compress(bytes) == bytes);  }
+      decompress(bytes);
+        { assert (decompress(bytes) == bytes);  }
+      bytes;
+    }
+  }
+  else{
+    calc == {
+      decompress(compress(bytes));
+      (if bytes[0] == bytes[1] then ... else );
+        {assert compressed(bytes) == x + bytes[0];}
+      decompress(x + bytes[0]);
+      { assert decompress(x + bytes[0]) == x*bytes[0];}
+      x*bytes[0];
+      { assert x*bytes[0] == bytes;}
+      bytes;
+    }
+  }
 }
+*/
 
 method compress_impl(bytes:array?<byte>) returns (compressed_bytes:array?<byte>)
   requires bytes != null;
@@ -101,7 +125,7 @@ method {:main} Main(ghost env:HostEnvironment?)
   var args := HostConstants.NumCommandLineArgs(env);
   // arg0 is compression, arg 1 is compress/decompress, arg2 is SourceFile, arg3 is DestFile 
   if args != 4{
-    print "Invalid arguments, should be: ./compression 0 SourceFile DestFile or ./compression 1 SourceFile DestFile\r\n";
+    print "Error: Invalid arguments, should be: ./compression 0 SourceFile DestFile or ./compression 1 SourceFile DestFile\r\n";
     return;
   }
 
@@ -122,7 +146,7 @@ method {:main} Main(ghost env:HostEnvironment?)
      //compress_impl(sourceFileStream); 
   } 
   else {
-    print "Invalid argument! Should be 0 or 1.";
+    print "Error: Invalid argument! Should be 0 or 1.";
     return;
   } */
 
