@@ -63,7 +63,6 @@ method compress_impl(bytes:array?<byte>) returns (compressed_bytes:array?<byte>)
   requires bytes != null;
   ensures  compressed_bytes != null;
   ensures  compressed_bytes[..] == compress(bytes[..]);
-  ensures |compressed_bytes[..]| <= |bytes[..]|;
   ensures forall i :: 0 <= i < bytes.Length ==> bytes[i] == old(bytes[i]);
 {
   var s : seq<byte> := [];
@@ -109,7 +108,6 @@ method decompress_impl(compressed_bytes:array?<byte>) returns (bytes:array?<byte
   requires compressed_bytes != null;
   ensures  bytes != null;
   ensures  bytes[..] == decompress(compressed_bytes[..]);
-  ensures |bytes[..]| >= |compressed_bytes[..]|
 {
   var s : seq<byte> := [];
   bytes := ArrayFromSeq(s);
