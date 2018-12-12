@@ -121,11 +121,25 @@ method decompress_impl(compressed_bytes:array?<byte>) returns (bytes:array?<byte
   }
 
   var i := 0;
+  var j := 0;
 
   if compressed_bytes.Length > 1{
     while i < compressed_bytes.Length
+      invariant 0 <= i <= compressed_bytes.Length
+      invariant bytes != null;
       decreases compressed_bytes.Length - i
-    {
+    { 
+      j := 0;
+      while j < compressed_bytes[i+1] as int
+        invariant bytes !=null 
+        invariant 0 <= j <= compressed_bytes[i+1] as int
+        invariant 0 <= i + 1 < bytes.Length
+        decreases compressed_bytes[i+1] as int - j as int
+      {
+        bytes := ArrayFromSeq(bytes[..] + [compressed_bytes[i]]);
+        j := j +1;
+      }
+      i := i +2;
       
     }
   }
