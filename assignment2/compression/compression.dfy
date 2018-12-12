@@ -229,7 +229,6 @@ method {:main} Main(ghost env:HostEnvironment?)
        // var decompressed := decompress_impl(sourceFileStream);
         //var readFromSource := decompressed.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
         var writeToDest := destFileStream.Write(file_offset as nat32, buffer, start as int32, num_bytes as int32);
-        print "File decompressed!\r\n"; 
       }
 
       else if(compressDecompress[0]  == '1'){
@@ -237,7 +236,6 @@ method {:main} Main(ghost env:HostEnvironment?)
         //var compressed := compress_impl(sourceFileStream); 
         //var readFromSource := compressed.Read(file_offset as nat32, buffer, start as int32, num_bytes as int32);
         var writeToDest := destFileStream.Write(file_offset as nat32, buffer, start as int32, num_bytes as int32);
-        print "File compressed!\r\n"; 
       } 
 
       else {
@@ -246,11 +244,17 @@ method {:main} Main(ghost env:HostEnvironment?)
       } 
     }
     file_offset := file_offset + buffer_size;  
+
+    print "File compressed/decompressed!\r\n"; 
   }
 
   //Close the sourceFile
   ModifiedStream(sourceFileStream);
   var closed := sourceFileStream.Close();
+
+  //Close the destFile
+  ModifiedStream(destFileStream);
+  var closed2 := destFileStream.Close();
 }
 
 // Guarantee that the buffer has been freshly allocated (and contains the information we want to read)
