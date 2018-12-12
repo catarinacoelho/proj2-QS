@@ -16,10 +16,11 @@ method ArrayFromSeq<A>(s: seq<A>) returns (a: array<A>)
 }
 
 function compress(bytes:seq<byte>) : seq<byte>
-  //decreases |bytes|
+  decreases bytes
 {
-  bytes
-  //if |bytes| <= 1 then bytes else [bytes[0]][..] + compress(bytes[1..])
+  //bytes
+  if |bytes| <= 1 then bytes else 
+  if bytes[0] == bytes[1] then [bytes[0]] + [|bytes[..2]| as byte] + compress(bytes[1..]) else [bytes[0]] + [|bytes[..1]| as byte] + compress(bytes[1..])
 }  
 
 function decompress(bytes:seq<byte>) : seq<byte>
@@ -65,19 +66,19 @@ method compress_impl(bytes:array?<byte>) returns (compressed_bytes:array?<byte>)
   ensures |compressed_bytes[..]| <= |bytes[..]|;
   ensures forall i :: 0 <= i < bytes.Length ==> bytes[i] == old(bytes[i]);
 {
-  var compressed : seq<byte>;
-  compressed_bytes := ArrayFromSeq(compressed);
+  var s : seq<byte> := [];
+  compressed_bytes := ArrayFromSeq(s);
 
   //in case the file is empty
   if bytes.Length == 0{
     compressed_bytes := bytes;
-    //return compressed_bytes;
+    return compressed_bytes;
   }
   
   //in case the file has only one byte to compress
   if bytes.Length == 1{
     compressed_bytes := ArrayFromSeq(bytes[..]); //adicionar o  + [1] esta a fazer com que uma condiçao might not hold
-    //return compressed_bytes; //condiçao pode nao hold pq compress nao ta implementado
+    return compressed_bytes; //condiçao pode nao hold pq compress nao ta implementado
   }
 
   //in case the file has more than one byte to compress
@@ -86,7 +87,6 @@ method compress_impl(bytes:array?<byte>) returns (compressed_bytes:array?<byte>)
     var i := 0;
     var j := 0;
     var count := 1;
-    var pos := 0;
 
     while(i < bytes.Length)
       invariant 0 <= i <= bytes.Length;
@@ -101,7 +101,7 @@ method compress_impl(bytes:array?<byte>) returns (compressed_bytes:array?<byte>)
             count := count + 1;
             j := j + 1;
           }
-        compressed_bytes := ArrayFromSeq(compressed_bytes[..] + [bytes[i]][..] + [count as byte]);
+        compressed_bytes := ArrayFromSeq(compressed_bytes[..] + [bytes[i]] + [count as byte]);
         i := i +1;
         
       }   
@@ -115,7 +115,30 @@ method decompress_impl(compressed_bytes:array?<byte>) returns (bytes:array?<byte
   ensures  bytes[..] == decompress(compressed_bytes[..]);
   ensures |bytes[..]| >= |compressed_bytes[..]|
 {
-  bytes := compressed_bytes;
+  var s : seq<byte> := [];
+  bytes := ArrayFromSeq(s);
+
+  //in case the file is empty
+  if compressed_bytes.Length == 0{
+    bytes := compressed_bytes;
+    return bytes;
+  }
+  
+  //in case the file has only one byte to compress
+  if compressed_bytes.Length == 1{
+    bytes := ArrayFromSeq(compressed_bytes[..]); //adicionar o  + [1] esta a fazer com que uma condiçao might not hold
+    return bytes; //condiçao pode nao hold pq compress nao ta implementado
+  }
+
+  var i := 0;
+
+  if compressed_bytes.Length > 1{
+    while i < compressed_bytes.Length
+      decreases compressed_bytes.Length - i
+    {
+      
+    }
+  }
 }
 
 method {:main} Main(ghost env:HostEnvironment?)
